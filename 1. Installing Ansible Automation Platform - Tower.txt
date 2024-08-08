@@ -1,0 +1,239 @@
+ANSIBLE AUTOMATION PLATFORM (TOWER):
+
+1. SYSTEM MUST BE DOWNLOADED VIA (developers.redhat.com)
+
+	#subscription-manager register --username cehgood1 --password CehPa44w0rd@123
+
+
+
+
+2. SYSTEM MUST BE UPDATED:
+
+	#sudo dnf update
+
+
+
+
+3. CHANGE THE HOSTNAME:
+
+	#systemctl set-hostname tower1
+
+
+
+
+4.  DOWNLOAD THE BUNDLED ANSIBLE AUTOMATION PLATFORM INSTALLER (OFFLINE INSTALLER):
+
+	- Online installer has issues.
+
+	- Offline Installer Link:
+	
+		- https://access.redhat.com/downloads/content/480
+
+		- Login with the Red Hat Credentials
+
+		- Select the latest bundled software, named as:
+
+			- "ansible-automation-platform-setup-bundle-2.4-7-x86_64.tar.gz"
+
+
+
+
+5. EXTRACT THE BUNDLED SOFTWARE:
+
+	#tar xvzf ansible-tower-setup-latest.tar.gz
+
+	#cd ansible-tower-setup-<tower_version>
+
+
+
+
+6. DELETE THE INVENTORY FILE & CREATE A NEW ONE WITH THE BELOW MENTIONED TEXTS:
+
+[all:vars]
+
+admin_password='password'							(Changed)
+pg_host='10.10.10.107'								(Changed)
+
+pg_port=5432
+pg_database='awx'
+pg_username='awx'
+
+pg_password='password'								(Changed)
+
+pg_sslmode='prefer'
+registry_url='registry.redhat.io'
+registry_username=''
+registry_password=''
+receptor_listener_port=27199
+
+automationhub_admin_password='password'						(Changed)
+
+automationhub_pg_host='10.10.10.107'						(Changed)
+
+automationhub_pg_port=5432
+automationhub_pg_database='automationhub'
+automationhub_pg_username='automationhub'
+
+automationhub_pg_password='password'						(Changed)
+
+automationhub_pg_sslmode='prefer'
+automationedacontroller_admin_password=''
+
+automationedacontroller_pg_host='localhost'					(Changed)
+
+automationedacontroller_pg_port=5432
+automationedacontroller_pg_database='automationedacontroller'
+automationedacontroller_pg_username='automationedacontroller'
+
+automationedacontroller_pg_password='password'					(Changed)
+
+automationedacontroller_pg_sslmode='prefer'
+sso_keystore_password=''
+sso_console_admin_password=''
+automation_platform_version='2.4'
+minimum_ansible_version='2.14'
+ansible_connection='local'
+ansible_user_id='root'
+ansible_user_uid=0
+ansible_user_gid=0
+ansible_user_gecos='root'
+ansible_user_dir='/root'
+ansible_user_shell='/bin/bash'
+ansible_real_user_id=0
+ansible_effective_user_id=0
+ansible_real_group_id=0
+ansible_effective_group_id=0
+ansible_virtualization_role='guest'
+ansible_virtualization_type='VMware'
+ansible_ssh_host_key_rsa_public='AAAAB3NzaC1yc2EAAAADAQABAAABgQDxUsWcwfy5Mnjrv6M26vhb9jCYwomt3RTbI3aPp4tnsz9TlWNRvLzQtsnn8/XcL28ejLy/QwFmp1PcnGXUihvZwLzGqPZoGAKsHzE/KiPYh/8PCpiILVu2krw3+tfxsN+fhvBvqw8WcPvhhDkPyAk0OnR8Qvj5SzTyI4hk97ZQyzxIMQnzayIqBiHkDfVfqU7cawey6seCtIpR22rkqFr5GBpOj6Cx49yBWW1QaTJyMnxZJTbJL6KAgQMnFvrEip/AjwjeqMv0d++P45mHqUHQHqIxOhcB8HRmWnhuIXflY7Y1FX2FV9X9D2shyESa36X7tlb6spuIb/2xAQzx5dOAZjYHoe1vdKFyWTQb+JqHotPYCUpN6Xg/+BPK+QxBWiycDIvBr/iew0zBZUG3cF/O6i/Dp3SVFrnl7RX/UBr6CYaqSFm2ic7EMrha8/eQhCiogKTOhibTDDNVSNKr/DhjQfwCgE5lHkOu8nvWeGqhkAVRFs3ShctxWYddmF6DgF0='
+ansible_ssh_host_key_rsa_public_keytype='ssh-rsa'
+ansible_ssh_host_key_ecdsa_public='AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBGu9q/6aVMzueoVNscw83J/KJISw1iZ1wrTvt73KG6Nps3nmiRxPT0iQgnvslI9OQrvcGuyMiNCSda0vcPVQ1GI='
+ansible_ssh_host_key_ecdsa_public_keytype='ecdsa-sha2-nistp256'
+ansible_ssh_host_key_ed25519_public='AAAAC3NzaC1lZDI1NTE5AAAAIP/pwZGEyPOlCvEFfyk90/Dn0AyXq65rNjlI7M5PAeWh'
+ansible_ssh_host_key_ed25519_public_keytype='ssh-ed25519'
+ansible_system='Linux'
+ansible_kernel='5.14.0-427.24.1.el9_4.x86_64'
+ansible_kernel_version='#1 SMP PREEMPT_DYNAMIC Sun Jun 23 11:48:35 EDT 2024'
+ansible_machine='x86_64'
+ansible_python_version='3.9.18'
+ansible_fqdn='ansibletower'
+ansible_hostname='ansibletower'
+ansible_nodename='ansibletower'
+ansible_domain=''
+ansible_userspace_bits='64'
+ansible_architecture='x86_64'
+ansible_userspace_architecture='x86_64'
+ansible_machine_id='fbf26645f9a9468faf6634ea7ab73ed7'
+ansible_distribution='RedHat'
+ansible_distribution_release='Plow'
+ansible_distribution_version='9.4'
+ansible_distribution_major_version='9'
+ansible_distribution_file_path='/etc/redhat-release'
+ansible_distribution_file_variety='RedHat'
+ansible_distribution_file_parsed=True
+ansible_distribution_file_search_string='Red Hat'
+ansible_os_family='RedHat'
+ansible_fips=False
+ansible_hostnqn='nqn.2014-08.org.nvmexpress:uuid:edbe4d56-e4ba-c25f-ef8e-ee5b67bc153e'
+ansible_system_capabilities_enforced='False'
+ansible_is_chroot=False
+ansible_selinux_python_present=True
+ansible_iscsi_iqn=''
+ansible_service_mgr='systemd'
+ansible_processor_count=4
+ansible_processor_cores=1
+ansible_processor_threads_per_core=1
+ansible_processor_vcpus=4
+ansible_processor_nproc=4
+ansible_memtotal_mb=3627
+ansible_memfree_mb=190
+ansible_swaptotal_mb=3071
+ansible_swapfree_mb=3068
+ansible_bios_date='11/12/2020'
+ansible_bios_vendor='Phoenix Technologies LTD'
+ansible_bios_version='6.00'
+ansible_board_asset_tag='NA'
+ansible_board_name='440BX Desktop Reference Platform'
+ansible_board_serial='None'
+ansible_board_vendor='Intel Corporation'
+ansible_board_version='None'
+ansible_chassis_asset_tag='No Asset Tag'
+ansible_chassis_serial='None'
+ansible_chassis_vendor='No Enclosure'
+ansible_chassis_version='N/A'
+ansible_form_factor='Other'
+ansible_product_name='VMware Virtual Platform'
+ansible_product_serial='VMware-56 4d 48 24 f1 f2 3d d3-14 7b 7b c0 75 13 c0 95'
+ansible_product_uuid='24484d56-f2f1-d33d-147b-7bc07513c095'
+ansible_product_version='None'
+ansible_system_vendor='VMware, Inc.'
+ansible_uptime_seconds=2175
+ansible_pkg_mgr='dnf'
+module_setup=True
+discovered_interpreter_python='/usr/bin/python3'
+bundle_install='true'
+setup_dir='/home/trainonic/ansible-automation-platform-setup-bundle-2.4-7-x86_64/.'
+
+# In AAP 2.X [tower] has been renamed to [automationcontroller]
+# Nodes in [automationcontroller] will be hybrid by default, capable of executing user jobs.
+# To specify that any of these nodes should be control-only instead, give them a host var of `node_type=control`
+[automationcontroller]
+10.10.10.107									(Changed)
+
+[execution_nodes]
+
+[automationhub]
+10.10.10.107									(Changed)
+
+[database]
+localhost ansible_connection=local						(Changed)
+
+
+[aap_valid_hosts]
+localhost ansible_connection=local						(Changed)
+
+
+	- Remove the text "(Changed)".
+
+	- Save and exit the inventory file.
+
+
+
+
+7. RUN THE SETUP FILE:
+
+	#sudo ./setup				(Takes 15 to 20 minutes to install.)
+
+
+
+
+8. TEST THE TOWER (Web Browser - GUI):
+
+	- Open up the web browser
+
+	- https://localhost
+
+	- Select your Ansible Automation Platform subscription to use (Username/Password)
+
+	- Get Subscription
+
+	- Select a subscription:
+
+		- Click on the radio button:
+
+			- Red Hat Developer Subscription for Individuals	16	8/7/2025, 3:59:59 am
+
+			- Select
+
+	- Next
+
+		- User analytics	(Checked)
+
+		- Automation Analytics	(Checked)
+
+	- Next
+
+	- Submit
+
+		- & After the successful submission, ansible automation platform is going to be available.
+X-X-X-X-X

@@ -1,0 +1,39 @@
+WORKING WITH PRE-BUILT ENVIRONMENT:
+
+1. CREATE A TOPOLOGY IN EVE-NG:
+
+	- Add 3 Routers
+
+	- Add 1 Switch		(Connect Switch to each Router interfaces GigabitEthernet0/0.)
+
+	- Add a Cloud		(Connect Cloud to the Switch.)
+
+
+
+
+2. INITIAL CONFIGURATION OF MANAGED DEVICES:
+R1:
+#hostname r1
+
+#ip domain-name trainonic.com
+
+#crypto key generate rsa modulus 2048
+
+#ip ssh version 2
+
+#username admin privilege 15 secret admin
+
+#line vty 0 4
+#transport input ssh
+#login local
+#exit
+
+#interface GigabitEthernet0/0
+#ip address 192.168.2.201 255.255.255.0
+#no shutdown
+#end
+
+#copy running-config startup-config
+X-X-X-X-X
+
+

@@ -1,0 +1,184 @@
+USING CUSTOM EXECUTION ENVIRONMENT IMAGE VIA QUAY.IO:
+
+1. ASSIGN IP ADDRESSES TO THE MANAGED DEVICES:
+
+	i. We, already have assigned IP address to r1.
+
+	ii. Now, assign Management IPs on r2 and r3.
+
+	iii. REPEAT THE BELOW STEPS ON R2 AND R3:
+
+		R2/R3:
+		#hostname r2/r3
+
+		#ip domain-name trainonic.com
+
+		#crypto key generate rsa modulus 2048
+
+		#ip ssh version 2
+
+		#username admin privilege 15 secret admin
+
+		#line vty 0 4
+		#transport input ssh
+		#login local
+		#exit
+
+		#interface GigabitEthernet0/0
+		#ip address 192.168.2.202/203 255.255.255.0
+		#no shutdown
+		#end
+
+		#copy running-config startup-config
+
+
+
+2. TESTING CONNECTIVITY WITH PING UTILITY:
+
+	#ping 192.168.2.202/203
+
+
+
+3. EDITING /etc/hosts FILE IN LINUX FOR NAME RESOLUTION:
+
+	#vim /etc/hosts
+
+	127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+	::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+
+	192.168.2.201   r1.trainonic.com        r1
+	192.168.2.202	r2.trainonic.com	r2		(This line is added in the file.)
+	192.168.2.203	r3.trainonic.com	r3		(This line is added in the file.)
+
+		- Repeat the same steps for other Routers.
+
+		- Save and quit the file.
+
+	#ping r2/r3						(Now, it should work.)
+
+
+
+4. SSH FROM THE LINUX CONTROLLER TO THE MANAGED DEVICES:
+
+	#ssh admin@r2					("admin" is the username created in Managed Devices.)
+
+	#ssh admin@r3					("admin" is the username created in Managed Devices.)
+
+
+
+5. VERIFYING THE SAVED FINGERPRINT:
+#cat /home/trainonic/.ssh/known_hosts
+
+
+
+6. RUNNING THE PLAYBOOK:
+
+	i. Everything is set: (Organization, Inventory, Groups, Hosts, Project, Templates)
+
+	ii. Write Playbook for configuring IP addresses in multiple interfaces on multiple routers.
+
+		a. ADDING HOST_VARS:
+
+		   #cd /var/lib/awx/projects/		(Ansible Automation Platform Directory.)
+
+		   #mkdir host_vars
+		   #cd host_vars
+
+		   #vim r1.yml
+			router_interfaces:
+			  - name: GigabithEthernet0/1
+			    ip_address: 50.50.50.1
+			    netmask: 255.255.255.0
+			  - name: GigabitEthernet0/2
+			    ip_address: 50.50.60.2
+			    netmask: 255.255.255.0
+
+				- Save and quit the file.
+
+		   #vim r2.yml
+			router_interfaces:
+			  - name: GigabithEthernet0/1
+			    ip_address: 50.50.50.2
+			    netmask: 255.255.255.0
+			  - name: GigabitEthernet0/2
+			    ip_address: 50.50.70.1
+			    netmask: 255.255.255.0
+
+				- Save and quit the file.
+
+
+		   #vim r3.yml
+			router_interfaces:
+			  - name: GigabithEthernet0/1
+			    ip_address: 50.50.60.2
+			    netmask: 255.255.255.0
+			  - name: GigabitEthernet0/2
+			    ip_address: 50.50.70.2
+			    netmask: 255.255.255.0
+
+				- Save and quit the file.
+
+
+
+		b. CREATING ROLES:
+
+		   #mkdir roles
+		   #cd roles
+
+		   #mkdir assign_ip
+		   #cd assign_ip
+
+		   #mkdir tasks
+		   #cd tasks
+		   #vim main.yml
+
+			---
+			- name: Configure IP Addresses
+			  ios_config:
+			    lines:
+			      - interface {{ item.name }}
+			      - ip address {{ item.ip_address }} {{ item.netmask }}
+			      - no shutdown
+			    parents: interface {{ item.name }}
+			  loop: "{{ router_interfaces }}"
+			  loop_control:
+			    loop_var: item
+
+				- Save and quit the file.
+
+
+		   #cd ..
+		   #mkdir defaults
+		   #cd defaults
+		   #vim main.yml
+
+			---
+			router_interfaces: []
+
+				- Save and quit the file.
+
+
+		   #cd ..
+		   #vim 2.assign_ip_on_all_devices.yml
+
+			---
+			- name: Apply Role To Configure on all Cisco Routers
+			  hosts: myciscodevices-group
+			  gather_facts:no
+			  roles:
+			    - assign_ip
+
+
+
+
+
+
+
+
+
+
+
+
+	ii. Change the Execution Environment to our Custom ones which is recently uploaded in the "quay.io".
+
+	iii. 

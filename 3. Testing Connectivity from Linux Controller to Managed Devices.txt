@@ -1,0 +1,104 @@
+TESTING CONNECTIVITY FROM LINUX CONTROLLER TO MANAGED DEVICES:
+
+
+1. TESTING CONNECTIVITY WITH PING UTILITY:
+
+	#ping IP_of_Managed_Device
+
+	#ping r1						(If not working then setup up DNS server or edit /etc/hosts file.)
+
+
+
+
+2. EDITING /etc/hosts FILE IN LINUX FOR NAME RESOLUTION:
+
+	#vim /etc/hosts
+
+	127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+	::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+
+	192.168.2.201   r1.trainonic.com        r1		(This line is added in the file.)
+
+		- Repeat the same steps for other Routers.
+
+		- Save and quit the file.
+
+	#ping r1						(Now, it should work.)
+
+
+
+
+3. SSH FROM THE LINUX CONTROLLER TO THE MANAGED DEVICES:
+
+	#ssh admin@r1						("admin" is the username created in Managed Devices.)
+
+								- "r1" is the device name which resolves to "192.168.2.201" IP address.
+
+	NOTE:
+
+	- If you get an error as shown below, then follow the steps mentioned on Forth point "4.".
+
+	ERROR:
+	"Unable to negotiate with 192.168.2.201 port 22: no matching key exchange method found. Their offer: diffie-hellman-group
+	 exchange-sha1,diffie-hellman-group14-sha1"
+
+
+
+
+4. SET THE "CRYPTO-POLICIES" TO LEGACY IN LINUX MACHINE:
+
+	- This setup is only done, when you get the error, mentioned on point "3.".
+
+	- This is because, you're using the legacy managed cisco devices.
+
+	- Thus, you need to set the crypto-policies to legacy so that it matches with the legacy crypto-policies that are in the Cisco 
+	  Managed Devices.
+
+#update-crypto-policies --show					(To view the current set crypto-policies in Linux machine.)
+
+								- By default, the crypto-policies are set to DEFAULT.
+
+								- So, you need to change it to LEGACY.
+
+
+#update-crypto-policies --set LEGACY				(Setting up crypto-policies to LEGACY.)
+
+
+#update-crypto-policies --show					(Verifying the crypto-policies.)
+
+								- & it should show you, that it is set to "LEGACY".
+
+
+#reboot								(Reboot the system to take the changes into effect.)
+
+
+
+
+5. SSH TO THE MANAGED DEVICE FROM LINUX CONTROLLER:
+
+#ssh admin@r1
+
+yes								(To save the finger print.)
+
+password							(Login password of the admin user which was created on Managed Devices.)
+
+
+
+
+6. VERIFYING THE SAVED FINGERPRINT:
+#cat /home/trainonic/.ssh/known_hosts
+
+r1 ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCqzxXXuoU2V81DKLcjwUFkd/m/uRpoKk+ZSJaKVGQoTiDG7gGZk7sWWJrrAEXBLli8gW+nRrwFVB68+eoA6Ow/XL5jfVtUyf42O6TRmj9ZuPwBLZcJiqYrA+VgnHTNXcORm2nXfCUa/5BO3ie10Qq/6QBwCl0wlh9CwE/zfV5qPh10mEU8f3KEj/GDRE/3db7Z7P4DaPb67akrdM+v0kYDZaUlnOacjSV+XT63pSp1aCGIxtyyCpo6KG6/nlpFXEGIPfCzzxoaPxK7Gv9dQs/pIcyaFtNRzqM3ZrCfJ8HFPHiK1ku+fQSiXNoMvbSiIrZO4s+bWeYISQEwE1LI1xuP
+X-X-X-X-X
+
+
+
+
+
+
+
+
+
+
+
+

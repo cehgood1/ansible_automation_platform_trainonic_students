@@ -1,0 +1,47 @@
+PUSHING THE EXECUTION ENVIRONEMT TO A PUBLIC AUTOMATION HUB:
+
+
+
+https://quay.io
+
+- Login with RedHat Credentials
+
+
+1.  CHANGING THE PASSWORD:
+
+	- Click on the username "top right"
+
+	- Click on "Account Settings"
+
+	- Change password
+
+
+
+2. TRY TO LOGIN VIA LINUX MACHINE:
+
+	-Switch back  to the Linux machine.
+
+#podman ps -a
+
+#podman images								(Verifying the Execution-Environment Image)
+
+#podman login quay.io							(Logging with the quay.io  credentials.)
+
+#podman tag localhost/trainonic_ee:latest  quay.io/cehgood1/trainonic-repo/dtltrainonic-ee 
+
+									- "quay.io" is site
+
+									- "cehgood1" is the username
+
+									- "trainonic-repo" is the name of the repository
+
+									- "dtltrainonic-ee" is the image name that is going to be 
+									  uploaded.
+
+#podman push quay.io/cehgood1/trainonic-repo/dtltrainonic-ee:latest	(Pushing the Image to the quay.io repository.)
+
+#podman logout quay.io							(Logging out from the quay.io via CLI.)
+X-X-X-X-X
+
+
+

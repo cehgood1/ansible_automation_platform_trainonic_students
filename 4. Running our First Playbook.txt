@@ -1,0 +1,192 @@
+RUNNING OUR FIRST PLAYBOOK:
+
+	NOTE:
+
+	- While working with Ansible Automation Platform (Tower), you don't have to Edit / Modify or Work
+
+		- With CLI inventory files.
+
+		- With CLI ansible.cfg files.
+
+
+
+1. INSTALL THE MANDATORY PACKAGES MENTIONED BELOW, BEFORE RUNNING THE PLAYBOOKS:
+
+	#ansible-galaxy collection install cisco.ios		(Installing the Cisco.ios package from the Ansible-Galaxy Collection.)
+	#ansible-galaxy collection list				(To verify the ansible-galaxy collection.)
+
+
+	#pip install paramiko					(Installing Paramiko for the connection plugin.)
+
+
+	#sudo dnf install -y docker				(Installing Docker for running the playbook in the execution environment.)
+
+								- Shows you the error "initializing source docker"
+
+
+
+2. LOGIN TO THE ANSIBLE AUTOMATION PLATFORM VIA WEB BROWSER:
+
+	- Open up Web Browser
+	- http://localhost
+	- username: admin
+	- password: password
+
+
+
+3. CREATING EXECUTION ENVIRONMENT:
+
+	- CREATING AN EXECUTION ENVIRONMENT:
+	-> Execution Environment (Under Administration)
+	-> Add
+	-> my-exe-env
+	-> Image: "quay.io/networkevolution/network_automation_ee" (I-Medita-Praveen = quay.io/pravin_mishra30/imedita_ee)
+	-> Pull: "Always pull container before running"
+	-> Save
+
+
+
+4. CREATING ORGANIZATION:
+
+	- CREATING ORGANIZATION:
+	-> Organization (Under Access)
+	-> Add
+	-> "my-org1"
+	-> Description "Organization for Cisco Managed Nodes"
+	-> Save
+
+
+
+5. CREATING INVENTORY:
+
+	- CREATING INVENTORY:
+	-> Inventory (Under Resources)
+	-> Add
+	-> Add Inventory
+	-> "my-inventory1"
+	-> "my-org1" (automatically selected)
+	-> Variables:
+		---
+		ansible_connection: ansible.netcommon.network_cli
+		ansible_network_os: cisco.ios.ios
+		ansible_network_cli_ssh_type: paramiko
+	-> Save
+
+
+
+6. ADDING A GROUP
+
+	- ADDING GROUP:
+	-> Inventories	(Under Resources)
+	-> Click on the created inventory "my-inventory1"
+	-> Click on "Groups" tab
+	-> Add
+	-> "my-group1"
+	-> Description "My First Group for Cisco Managed Devices"
+	-> Save
+
+
+
+7. ADDING HOST TO THE GROUP:
+
+	- ADDING HOSTS:
+	-> Inventories	(Under Resources)
+	-> Click on the created inventory "my-inventory1"
+	-> Click on "Groups" tab
+	-> Click on created group name "my-group1"
+	-> Click on "Hosts" tab
+	-> Add
+	-> Add new host
+	-> "r1"
+	-> Description "My First Cisco Managed host"
+	-> Save
+
+	-> Click on "Hosts" tab (Under Resources) to verify if it's added in the correct group.
+
+
+
+8. CREATING CREDENTIALS:
+
+	- CREATING CREDENTIALS FOR CISCO MANAGED NODES:
+	-> Credentials (Under Resources)
+	-> Add
+	-> "my-cisco-cred1"
+	-> description "Credentials for my Cisco Managed Devices"
+	-> "my-org1"
+	-> Credential type "Machine"					(Select "Machine" for Cisco or RHEL Managed Devices)
+	-> Username: testuser1						(Username created on Cisco IOS)
+	-> Password: testuser1						(Password of Cisco IOS)
+	-> Save
+
+
+
+9. CREATING PROJECTS:
+
+	- CREATING PROJECT:
+	-> Project (Under Resources)
+	-> Add
+	-> "my-project1"
+	-> Description "My First Project"
+	-> "my-org1"
+	-> SCM-Source Control Type = Manual					(Working on manual)
+	-> Project Base Path (/var/lib/awx/projects)
+		- Switch back to the RHEL system and create a directory for our tower playbooks
+		- Add or create a playbook to the recently created directory - path - /var/lib/awx/projects (Mentioned below)
+
+
+[trainonic@ansibletower Ansible_Project]$ mkdir 1.Playbooks 			(Creating Directory for playbooks.)
+
+
+[trainonic@ansibletower Ansible_Project]$ cat 1.Assign_IP.yml 			(Assigning IP on R1's gi0/1 interface.)
+---
+
+- name: Assigning IP on Cisco IOS Router
+  hosts: 10.10.10.201
+  gather_facts: no
+  connection: network_cli
+  tasks:
+    - name: Configure IP
+      ios_config:						(Dictionary)
+        lines:							(List containing multiple items)
+          - interface GigabitEthernet0/1
+          - ip address 30.1.1.1 255.255.255.0
+          - no shutdown
+        parents: interface GigabitEthernet0/1
+      register: result
+
+    - name: Verification
+      ios_command:						(Another dictionary)
+        commands:
+          - show ip interface brief
+      register: show
+
+    - name: print the result
+      debug:
+        msg: "{{ show }}"
+
+
+	-> Switch back to the ansible automation platform web browser
+	-> Select the Playbook Directory 			(Choose the one that you've created)
+	-> Save
+
+
+
+10. CREATING TEMPLATES:
+
+	- CREATING TEMPLATES:
+		- This is where the actual work is going to happen.
+	-> Templates (Under Resources)
+	-> Add a Job Template
+	-> "my-template1"
+	-> job type "run"
+	-> "my-inventory"
+	-> "my-project"
+	-> 1.banner_motd.yml		(Playbook autodetected.)
+	-> credentials	"my-cisco-cred1"
+	- Save
+
+	-> Launch						(Launch the playbook.)
+X-X-X-X-X
+
+
+

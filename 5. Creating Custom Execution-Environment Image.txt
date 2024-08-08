@@ -1,0 +1,350 @@
+1. DEFINE EXECUTION ENVIRONMENT:
+
+	- In the Ansible Automation Platform, an "execution environment" refers to a self-contained environment where Ansible playbooks, 
+	  roles, and tasks are executed. It provides a consistent and isolated environment for running automation tasks, ensuring that all 
+	  necessary dependencies and configurations are available and properly managed.
+
+	- Here are key aspects of execution environments in Ansible Automation Platform:
+
+		i. Isolation: Execution environments are isolated from the host system and other environments. This isolation helps prevent 
+		    conflicts between different projects or automation tasks that might require different versions of software or libraries.
+
+		ii. Dependencies: They include all the required dependencies such as Python packages, Ansible roles, and other libraries 
+		    necessary for running your automation. This ensures that the playbooks execute reliably regardless of the underlying 
+		    system.
+
+		iii. Reproducibility: By using execution environments, you can ensure that the automation tasks are run in a consistent 
+		     setting, which is crucial for reproducibility and debugging. This helps to eliminate issues caused by differences in 
+		     environments across different systems.
+
+		iv. Customizability: Execution environments can be customized to include specific versions of software or additional tools 
+		    required for your tasks. This is typically achieved through configuration files or Docker images that define the 
+		    environment.
+
+		v. Deployment: In Ansible Automation Platform, execution environments are often implemented as containerized environments, 
+		   such as Docker images. This means you can easily deploy and manage them using container orchestration tools.
+
+	- In summary, execution environments in the Ansible Automation Platform provide a controlled and reproducible space to run automation 
+	  tasks, ensuring consistency and compatibility across different systems.
+
+
+
+
+
+
+3. REQUIREMENTS TO CREATE AN EXECUTION ENVIRONMENT:
+
+	0. UPDATE THE SYSTEM:
+
+	i. DOCKER
+		- Docker is an open-source platform designed to automate the development, shipping, and deployment of applications using 
+		  containerization. Containers are lightweight, portable, and self-sufficient units that encapsulate an application and 
+		  its dependencies, ensuring that it runs consistently across different computing environments.
+
+	ii. PODMAN
+		- Podman is an open-source container management tool that provides capabilities for creating, running, and managing 
+		  containers and container images. It is designed to be a drop-in replacement for Docker and offers several features and 
+		  benefits that make it distinct and useful in various scenarios.
+
+
+	iii. PYTHON-DEVEL
+		- python-devel (or python-dev on some systems) is a package that contains development tools and header files necessary for 
+		  building and compiling Python modules and extensions.
+
+	iv. PYTHON-CYTHON
+		- python-cython is a package that provides the Cython language and tools for Python. Cython is a programming language that 
+		  makes writing C extensions for Python as easy as Python itself. It is used to improve the performance of Python code and 
+		  to interface Python with C/C++ code.
+
+	v. ANSIBLE BUILDER
+		- Ansible Builder is a tool designed to simplify the creation of custom execution environments for Ansible Automation 
+		  Platform. Execution environments are self-contained environments that include all necessary dependencies, tools, and 
+		  configurations needed to run Ansible playbooks and roles reliably.
+
+
+
+
+
+
+
+
+3. CREATING EXECUTION ENVIRONEMT IMAGE:
+
+
+	- https://developers.redhat.com/articles/2023/05/08/how-create-execution-environments-using-ansible-builder#installing_the_execution_environment_builder
+
+
+	-THIS LINK WAS FOUND BY MYSELF:
+		- https://ansible.readthedocs.io/projects/builder/en/latest/definition/#version-3-sample-file
+
+
+	- Install Mandatory Packages:
+#sudo dnf update
+
+#sudo pip install ansible-builder
+
+#sudo dnf install -y docker*
+
+#sudo dnf install -y podman
+
+#sudo dnf install -y python*-devel
+
+#subscription-manager repos --enable codeready-builder-for-rhel-9-x86_64-rpms
+#sudo dnf install -y python*-Cython
+
+
+
+	- Create Directory:
+#mkdir exe-env						(Creating a new directory)
+
+#cd exe-env
+
+
+
+
+3. BUILDING THE EXECUTION-ENVIRONMENT:
+
+
+a.POPULATE THE EXECUTION-ENVIRONMENT.YML FILE:
+
+	- The execution-environment.yml file is a crucial component for defining and managing custom execution environments in Ansible 
+	  Automation Platform. It allows you to specify the dependencies, configurations, and additional elements needed for running 
+	  Ansible tasks and playbooks efficiently.
+
+
+#vim execution-environment.yml
+---
+version: 3
+
+build_arg_defaults:
+  ANSIBLE_GALAXY_CLI_COLLECTION_OPTS: '--pre'
+
+dependencies:
+  ansible_core:
+    package_pip: ansible-core==2.14.4
+  ansible_runner:
+    package_pip: ansible-runner
+  galaxy: requirements.yml
+  python:
+    - six
+    - psutil
+  system: bindep.txt
+  exclude:
+    python:
+      - docker
+    system:
+      - python3-Cython
+
+images:
+  base_image:
+    name: quay.io/ansible/awx-ee:latest
+
+additional_build_steps:
+  prepend_base:
+    - RUN echo This is a prepend base command!
+
+  prepend_final: |
+    RUN whoami
+    RUN cat /etc/os-release
+  append_final:
+    - RUN echo This is a post-install command!
+    - RUN ls -la /etc
+
+
+
+
+b. CREATING REQUIREMENTS.YML FILE:
+
+	- The requirements.yml file is a key tool in Ansible for managing dependencies. It allows you to specify which roles and 
+	  collections are needed for your Ansible projects, including their sources and versions. By using this file with the ansible-
+	  galaxy command, you can easily install and manage these dependencies, ensuring consistency and reproducibility across your 
+	  automation tasks.
+
+
+#vim requirements.yml
+---
+collections:
+  - name: ansible.netcommon
+  - name: cisco.ios
+  - name: cisco.nxos
+  - name: community.general
+
+
+
+
+
+c. CREATING REQUIREMENTS.TXT FILE:
+
+	- The requirements.txt file is a standard way to specify Python package dependencies and their versions for a project. It helps 
+	  ensure that the same versions of libraries are used across different environments, which is crucial for maintaining consistency 
+	  and avoiding compatibility issues. By using pip with requirements.txt, you can easily install and manage the dependencies needed 
+	  for your Python projects.
+
+
+#vim requirements.txt
+ansible
+ansible-pylibssh
+pyats
+ntc-templates
+netmiko
+paramiko
+
+
+
+
+d. CREATING BINDEP.TXT FILE:
+
+	- The bindep.txt file is a crucial part of managing system-level dependencies for Python projects, especially in automated 
+	  environments like CI/CD pipelines. It helps ensure that all necessary system packages are installed, providing consistency and 
+	  reliability across different environments. By using bindep, you can automate the installation of these dependencies, making your 
+	  build and deployment processes more efficient and reproducible.
+
+#vim bindep.txt
+git [platform:rpm]
+git [platform:dpkg]
+iputils [platform:rpm]
+iputils [platform:dpkg]
+
+
+
+
+e. BUILDING THE EXECUTION-ENVIRONMENT IMAGE USING ANSIBLE-BUILDER:
+
+#podman images		- The command podman images (or podman image ls, which is an alternative) is used to list all container images 
+			  stored on your local system. Here’s a detailed breakdown of what this command does:
+
+				- podman: This is the command-line tool used for managing containers with Podman.
+
+				- images: This subcommand lists all the container images that are available on your local system.
+
+
+#ansible-builder build -f execution-environment.yml -v3 -t dtltrainonic-ee	(Building a new execution-environment image)
+
+										- Takes some time 15-20 minutes.
+
+
+#podman images		(Now, you can see the image created successfully.)
+******************************************************************************************************************************************
+X-X-X-X-X		(Video Till Here.)
+
+
+
+
+
+******************************************************************************************************************************************
+OTHER HELPFUL COMMANDS:
+
+f. CREATING CONTAINER ID:
+
+#podman ps -a					(Verifying the container ID.)
+
+	- The command podman ps -a is used to list all containers, including those that are not currently running. Here’s a detailed 
+	  breakdown of what each part of the command does:
+
+		- podman: This is the command-line tool for managing containers with Podman, an open-source container management tool.
+
+		- ps: This subcommand stands for "process status" and is used to list containers. It shows information about the 
+		  containers that are currently running.
+
+		- -a: This stands for --all. It modifies the ps command to include all containers in the output, not just the ones that 
+		  are currently running. This means it will list both running and stopped containers.
+
+
+#podman create -it --name dcb7c86fd034 localhost/dtltrainonic-ee:latest		(Creating Container ID.)
+
+	- The command podman create -it is used to create a new container in Podman. Here’s a breakdown of what this command does:
+
+		i. podman: This is the command-line tool for managing containers with Podman, an open-source container management tool 
+		   that is a daemonless and rootless alternative to Docker.
+
+		ii. create: This subcommand is used to create a new container based on the specified image but does not start the 
+		    container. The create command prepares the container and sets it up according to the configuration but leaves it in a 
+		    stopped state.
+
+		iii. -i: This stands for --interactive. It keeps the container’s standard input (stdin) open, even if not attached. This 
+		     flag is useful if you want to interact with the container’s shell or applications later. It is typically used with 
+		     the -t flag to enable interactive terminal sessions.
+
+		iv. -t: This stands for --tty. It allocates a pseudo-TTY (terminal) for the container. This allows you to have a terminal 
+		    session inside the container, which is useful for running interactive commands.
+
+#podman ps -a					(Verifying the container ID and is created successfully.)
+
+						- But, the status is Created.
+
+						- & we need to make it up to test it.
+
+
+#podman start CONTAINER_ID_f984578d15cd		(The command podman start CONTAINER_ID is used to start a previously created but stopped 
+						 container. Here’s a detailed breakdown of what this command does:)
+
+						- podman: This is the command-line tool used for managing containers with Podman.
+
+						- start: This subcommand is used to start one or more containers that have been created 
+						  but are not currently running.
+
+						- CONTAINER_ID: This represents the unique identifier or name of the container you want to 
+						  start. You can use either the full or abbreviated container ID or the container's name.
+
+
+#podman exec -it f984578d15cd /bin/bash		(The command podman exec -it 9cb297487d18 /bin/bash is used to execute a command inside a 
+						 running container. Here’s a detailed breakdown of what this command does:)
+
+						- podman: This is the command-line tool used for managing containers with Podman.
+
+						- exec: This subcommand is used to run a command inside an already running container.
+
+						- -i: This flag stands for --interactive. It keeps the standard input (stdin) open, 
+						  allowing you to interact with the command being executed inside the container. This is 
+						  essential for interactive sessions.
+
+						- -t: This flag stands for --tty. It allocates a pseudo-TTY (terminal) for the command. 
+						  This makes it possible to use interactive features like those found in a terminal 
+						  session, such as command-line editing and color output.
+
+						- 9cb297487d18: This is the unique identifier (ID) of the running container in which you 
+						  want to execute the command. You can use either the full or abbreviated ID or the 
+						  container’s name.
+
+						- /bin/bash: This is the command you want to execute inside the container. In this case, 
+						  it starts an interactive Bash shell session within the container.
+
+#exit				(To exit out from the bash.)
+
+
+#podman stop Container_ID_f984578d15cd		(Stops the container, showing the status as "Exited".)
+
+#podman -ps
+
+#podman rm 704b306e98c9				(Removing the container from the current running process.)
+******************************************************************************************************************************************
+X-X-X-X-X
+
+
+
+
+
+******************************************************************************
+OTHER HELPFUL COMMAND: 
+
+podman create -it --name imedita_ee_custom locahost/imedita_ee_custom:latest
+ 
+podman exec -it imedita_ee ansible-galaxy collection list
+ 
+podman exec -it imedita_ee ansible --version
+ 
+podman exec -it imedita_ee ansible-community --version
+ 
+podman exec -it imedita_ee /bin/bash
+ 
+ 
+ 
+ 
+podman stop imedita_ee
+ 
+podman rm imedita_ee
+******************************************************************************
+
+
+
+
